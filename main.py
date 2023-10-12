@@ -11,15 +11,12 @@ import smtplib
 from email.mime.text import MIMEText
 from loguru import logger
 
-# logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-# logger = logging.getLogger(__name__)
 
 # API_URL
 LIKIE_URL = "http://c.tieba.baidu.com/c/f/forum/like"
 TBS_URL = "http://tieba.baidu.com/dc/common/tbs"
 SIGN_URL = "http://c.tieba.baidu.com/c/c/forum/sign"
 
-os.environ['BDUSS'] = 'ldOOVJuMDhDRGdra0dGNzJZa2tnMk5Sc35scnV5Wjd3cHM5TVJsSENYNGR4Yk5rSVFBQUFBJCQAAAAAAAAAAAEAAACdF3c3aG91c2XPuti3AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB04jGQdOIxkW'
 ENV = os.environ
 
 HEADERS = {
