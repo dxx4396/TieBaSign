@@ -9,16 +9,17 @@ import random
 
 import smtplib
 from email.mime.text import MIMEText
+from loguru import logger
 
-
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
+# logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+# logger = logging.getLogger(__name__)
 
 # API_URL
 LIKIE_URL = "http://c.tieba.baidu.com/c/f/forum/like"
 TBS_URL = "http://tieba.baidu.com/dc/common/tbs"
 SIGN_URL = "http://c.tieba.baidu.com/c/c/forum/sign"
 
+os.environ['BDUSS'] = 'ldOOVJuMDhDRGdra0dGNzJZa2tnMk5Sc35scnV5Wjd3cHM5TVJsSENYNGR4Yk5rSVFBQUFBJCQAAAAAAAAAAAEAAACdF3c3aG91c2XPuti3AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB04jGQdOIxkW'
 ENV = os.environ
 
 HEADERS = {
@@ -171,13 +172,15 @@ def client_sign(bduss, tbs, fid, kw):
     data.update({BDUSS: bduss, FID: fid, KW: kw, TBS: tbs, TIMESTAMP: str(int(time.time()))})
     data = encodeData(data)
     res = s.post(url=SIGN_URL, data=data, timeout=5).json()
+    logger.info(f"签到结果：{res}")
     return res
 
+
 def send_email(sign_list):
-    if ('HOST' not in ENV or 'FROM' not in ENV or 'TO' not in ENV or 'AUTH' not in ENV):
+    if 'host' not in ENV or 'FROM' not in ENV or 'TO' not in ENV or 'AUTH' not in ENV:
         logger.error("未配置邮箱")
         return
-    HOST = ENV['HOST']
+    host = ENV['host']
     FROM = ENV['FROM']
     TO = ENV['TO'].split('#')
     AUTH = ENV['AUTH']
@@ -198,33 +201,34 @@ def send_email(sign_list):
     for i in sign_list:
         body += f"""
         <div class="child">
-            <div class="name"> 贴吧名称: { i['name'] }</div>
-            <div class="slogan"> 贴吧简介: { i['slogan'] }</div>
+            <div class="name"> 贴吧名称: {i['name']}</div>
+            <div class="slogan"> 贴吧简介: {i['slogan']}</div>
         </div>
         <hr>
         """
     msg = MIMEText(body, 'html', 'utf-8')
     msg['subject'] = subject
     smtp = smtplib.SMTP()
-    smtp.connect(HOST)
+    smtp.connect(host)
     smtp.login(FROM, AUTH)
     smtp.sendmail(FROM, TO, msg.as_string())
     smtp.quit()
 
+
+@logger.catch
 def main():
-    if ('BDUSS' not in ENV):
+    if 'BDUSS' not in ENV:
         logger.error("未配置BDUSS")
         return
     b = ENV['BDUSS'].split('#')
     for n, i in enumerate(b):
-        logger.info("开始签到第" + str(n) + "个用户" + i)
+        logger.info("开始签到第" + str(n + 1) + "个用户")
         tbs = get_tbs(i)
         favorites = get_favorite(i)
         for j in favorites:
-            time.sleep(random.randint(1,5))
+            time.sleep(random.randint(1, 5))
             client_sign(i, tbs, j["id"], j["name"])
-        logger.info("完成第" + str(n) + "个用户签到")
-    # send_email(favorites)
+        logger.info("完成第" + str(n + 1) + "个用户签到")
     logger.info("所有用户签到结束")
 
 
