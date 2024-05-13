@@ -164,12 +164,20 @@ def encodeData(data):
 
 def client_sign(bduss, tbs, fid, kw):
     # 客户端签到
-    logger.info("开始签到贴吧：" + kw)
+    sing_result_map = {
+        "0": "签到成功。",
+        "160002": "亲，你之前已经签过了。"
+    }
+    logger.info(f"开始签到贴吧：{kw}")
     data = copy.copy(SIGN_DATA)
     data.update({BDUSS: bduss, FID: fid, KW: kw, TBS: tbs, TIMESTAMP: str(int(time.time()))})
     data = encodeData(data)
     res = s.post(url=SIGN_URL, data=data, timeout=5).json()
-    logger.info(f"签到结果：{res}")
+    error_code = res["error_code"]
+    if error_code in sing_result_map.keys():
+        logger.success(sing_result_map[error_code])
+    else:
+        logger.info(f"签到结果：{res}")
     return res
 
 
